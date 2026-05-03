@@ -1,15 +1,32 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { RatingReview } from '../../models/rating-review.model';
+import { Booking } from '../../models/booking.model';
 import { CreateRatingDto } from './dto/create-rating.dto';
 import { UpdateRatingDto } from './dto/update-rating.dto';
 
 @Injectable()
 export class RatingsService {
-  constructor(@InjectModel(RatingReview) private ratingModel: typeof RatingReview) {}
+  constructor(
+    @InjectModel(RatingReview) private ratingModel: typeof RatingReview,
+    @InjectModel(Booking) private bookingModel: typeof Booking,
+  ) {}
 
-  create(createRatingDto: CreateRatingDto) {
-    return this.ratingModel.create(createRatingDto as any);
+  async create(userId: number, createRatingDto: CreateRatingDto) {
+    const booking = await this.bookingModel.findByPk(createRatingDto.booking_id);
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+    if (booking.user_id !== userId) {
+      throw new ForbiddenException('You can only rate your own bookings');
+    }
+    if (booking.driver_id !== createRatingDto.driver_id) {
+      throw new ForbiddenException('Driver does not match the booking assignment');
+    }
+    return this.ratingModel.create({
+      ...createRatingDto,
+      user_id: userId,
+    } as any);
   }
 
   findAll() {

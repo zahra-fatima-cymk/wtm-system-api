@@ -50,7 +50,8 @@ export class DriversController {
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.DRIVER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current driver profile' })
   @ApiResponse({ status: 200, type: Driver })

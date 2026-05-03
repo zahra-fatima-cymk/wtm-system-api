@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -23,14 +24,21 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserType } from '../../common/enums';
+import { DriversService } from '../drivers/drivers.service';
 
 @ApiTags('Driver Tasks')
 @Controller('driver-tasks')
 export class DriverTasksController {
-  constructor(private readonly driverTasksService: DriverTasksService) {}
+  constructor(
+    private readonly driverTasksService: DriverTasksService,
+    private readonly driversService: DriversService,
+  ) {}
 
   @Get()
-  @ApiOperation({ summary: 'List all driver tasks' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all driver tasks (Admin only)' })
   @ApiResponse({ status: 200, type: [DriverTask] })
   findAll() {
     return this.driverTasksService.findAll();
@@ -47,10 +55,23 @@ export class DriverTasksController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a specific driver task by ID' })
   @ApiResponse({ status: 200, type: DriverTask })
-  findOne(@Param('id') id: string) {
-    return this.driverTasksService.findOne(+id);
+  async findOne(@Param('id') id: string, @Request() req) {
+    const task = await this.driverTasksService.findOne(+id);
+    if (!task) {
+      throw new ForbiddenException('Driver task not found or access denied');
+    }
+    if (req.user.type === UserType.ADMIN) {
+      return task;
+    }
+    const driver = await this.driversService.findByUserId(req.user.id);
+    if (!driver || task.driver_id !== driver.id) {
+      throw new ForbiddenException('Access denied');
+    }
+    return task;
   }
 
   @Post()
@@ -69,7 +90,17 @@ export class DriverTasksController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a driver task' })
   @ApiResponse({ status: 200, type: DriverTask })
-  update(@Param('id') id: string, @Body() updateDriverTaskDto: UpdateDriverTaskDto) {
+  async update(@Param('id') id: string, @Body() updateDriverTaskDto: UpdateDriverTaskDto, @Request() req) {
+    const task = await this.driverTasksService.findOne(+id);
+    if (!task) {
+      throw new ForbiddenException('Driver task not found');
+    }
+    if (req.user.type === UserType.DRIVER) {
+      const driver = await this.driversService.findByUserId(req.user.id);
+      if (!driver || task.driver_id !== driver.id) {
+        throw new ForbiddenException('Access denied');
+      }
+    }
     return this.driverTasksService.update(+id, updateDriverTaskDto);
   }
 

@@ -58,6 +58,14 @@ export class BookingsService {
     return booking;
   }
 
+  findByDriver(driverId: number) {
+    return this.bookingModel.findAll({
+      where: { driver_id: driverId },
+      include: [Service, Driver],
+      order: [['created_at', 'DESC']],
+    });
+  }
+
   async update(userId: number, id: number, updateBookingDto: UpdateBookingDto, isAdmin = false) {
     const booking = await this.findOne(id);
     if (!isAdmin && booking.user_id !== userId) {

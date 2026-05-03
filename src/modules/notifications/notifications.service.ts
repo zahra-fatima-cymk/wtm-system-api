@@ -28,11 +28,11 @@ export class NotificationsService {
     });
   }
 
-  async markAsRead(id: number): Promise<Notification | null> {
+  async markAsRead(id: number, userId: number): Promise<Notification | null> {
     const notification = await this.notificationModel.findByPk(id);
-    if (notification) {
-      return await notification.update({ is_read: true, read_at: new Date() });
+    if (!notification || notification.user_id !== userId) {
+      return null;
     }
-    return null;
+    return await notification.update({ is_read: true, read_at: new Date() } as any);
   }
 }

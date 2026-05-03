@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -23,17 +24,35 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserType } from '../../common/enums';
+import { DriversService } from '../drivers/drivers.service';
 
 @ApiTags('Ratings')
 @Controller('ratings')
 export class RatingsController {
-  constructor(private readonly ratingsService: RatingsService) {}
+  constructor(
+    private readonly ratingsService: RatingsService,
+    private readonly driversService: DriversService,
+  ) {}
 
   @Get()
-  @ApiOperation({ summary: 'List all ratings' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all ratings (Admin only)' })
   @ApiResponse({ status: 200, type: [RatingReview] })
   findAll() {
     return this.ratingsService.findAll();
+  }
+
+  @Get('driver/me')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.DRIVER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get ratings for current driver' })
+  @ApiResponse({ status: 200, type: [RatingReview] })
+  async findMyDriverRatings(@Request() req) {
+    const driver = await this.driversService.findByUserId(req.user.id);
+    return driver ? this.ratingsService.findByDriver(driver.id) : [];
   }
 
   @Get('driver/:driverId')
@@ -53,7 +72,10 @@ export class RatingsController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get a rating by ID' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get a rating by ID (Admin only)' })
   @ApiResponse({ status: 200, type: RatingReview })
   findOne(@Param('id') id: string) {
     return this.ratingsService.findOne(+id);
@@ -64,8 +86,8 @@ export class RatingsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Submit a rating for a booking' })
   @ApiResponse({ status: 201, type: RatingReview })
-  create(@Body() createRatingDto: CreateRatingDto) {
-    return this.ratingsService.create(createRatingDto);
+  create(@Request() req, @Body() createRatingDto: CreateRatingDto) {
+    return this.ratingsService.create(req.user.id, createRatingDto);
   }
 
   @Patch(':id')

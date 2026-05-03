@@ -20,6 +20,9 @@ export class PaymentsService {
     if (!booking) {
       throw new NotFoundException('Booking not found');
     }
+    if (booking.user_id !== userId) {
+      throw new ForbiddenException('You can only create payments for your own bookings');
+    }
 
     const payment = await this.paymentModel.create({
       ...createPaymentDto,

@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -30,7 +31,10 @@ export class InvoicesController {
   constructor(private readonly invoicesService: InvoicesService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List all invoices' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all invoices (Admin only)' })
   @ApiResponse({ status: 200, type: [Invoice] })
   findAll() {
     return this.invoicesService.findAll();
@@ -46,10 +50,17 @@ export class InvoicesController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get invoice by ID' })
   @ApiResponse({ status: 200, type: Invoice })
-  findOne(@Param('id') id: string) {
-    return this.invoicesService.findOne(+id);
+  async findOne(@Param('id') id: string, @Request() req) {
+    const isAdmin = req.user.type === UserType.ADMIN;
+    const invoice = await this.invoicesService.findOne(+id, req.user.id, isAdmin);
+    if (!invoice) {
+      throw new ForbiddenException('Invoice not found or access denied');
+    }
+    return invoice;
   }
 
   @Post()

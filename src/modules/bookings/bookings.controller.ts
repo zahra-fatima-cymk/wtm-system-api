@@ -46,11 +46,15 @@ export class BookingsController {
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get bookings for current user' })
+  @ApiOperation({ summary: 'Get bookings for current user or assigned driver' })
   @ApiResponse({ status: 200, type: [Booking] })
-  findMyBookings(@Request() req) {
+  async findMyBookings(@Request() req) {
     if (req.user.type === UserType.ADMIN) {
       return this.bookingsService.findAll();
+    }
+    if (req.user.type === UserType.DRIVER) {
+      const driver = await this.driversService.findByUserId(req.user.id);
+      return driver ? this.bookingsService.findByDriver(driver.id) : [];
     }
     return this.bookingsService.findByUser(req.user.id);
   }
