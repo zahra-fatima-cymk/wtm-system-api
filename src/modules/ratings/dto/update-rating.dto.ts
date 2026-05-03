@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, IsString, Min, Max, IsJSON } from 'class-validator';
+import { IsInt, IsOptional, IsString, Min, Max, IsObject } from 'class-validator';
 
 export class UpdateRatingDto {
   @IsInt()
@@ -19,7 +19,7 @@ export class UpdateRatingDto {
   @IsOptional()
   review_text?: string;
 
-  @IsJSON()
+  @IsObject()
   @IsOptional()
   categories?: object;
 }

@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString, Min, Max, IsJSON } from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, IsString, Min, Max, IsObject } from 'class-validator';
 
 export class CreateRatingDto {
   @IsInt()
@@ -19,7 +19,7 @@ export class CreateRatingDto {
   @IsOptional()
   review_text?: string;
 
-  @IsJSON()
+  @IsObject()
   @IsOptional()
   categories?: object;
 }
