@@ -12,6 +12,9 @@ import { ServicesModule } from './modules/services/services.module';
 import { BookingsModule } from './modules/bookings/bookings.module';
 import { DriversModule } from './modules/drivers/drivers.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { DriverTasksModule } from './modules/driver-tasks/driver-tasks.module';
+import { RatingsModule } from './modules/ratings/ratings.module';
+import { InvoicesModule } from './modules/invoices/invoices.module';
 
 @Module({
   imports: [
@@ -28,6 +31,9 @@ import { PaymentsModule } from './modules/payments/payments.module';
     BookingsModule,
     DriversModule,
     PaymentsModule,
+    DriverTasksModule,
+    RatingsModule,
+    InvoicesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

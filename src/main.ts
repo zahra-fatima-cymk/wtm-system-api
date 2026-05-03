@@ -32,6 +32,9 @@ async function bootstrap() {
     .addTag('payments')
     .addTag('notifications')
     .addTag('history')
+    .addTag('driver-tasks')
+    .addTag('ratings')
+    .addTag('invoices')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
