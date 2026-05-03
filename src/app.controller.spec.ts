@@ -15,8 +15,8 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+    it('should return "Welcome to the WTM System API!"', () => {
+      expect(appController.getHello()).toBe('Welcome to the WTM System API!');
     });
   });
 });
