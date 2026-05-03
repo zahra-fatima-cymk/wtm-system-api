@@ -13,7 +13,7 @@ module.exports = {
         {
           type: 'admin',
           email: 'admin@wtm.com',
-          phone: '+966500000001',
+          phone: '+92300000001',
           first_name: 'System',
           last_name: 'Admin',
           password_hash: hashedPassword,
@@ -24,7 +24,7 @@ module.exports = {
         {
           type: 'driver',
           email: 'driver1@wtm.com',
-          phone: '+966500000002',
+          phone: '+92300000002',
           first_name: 'Ahmed',
           last_name: 'Driver',
           password_hash: driverPassword,
@@ -35,7 +35,7 @@ module.exports = {
         {
           type: 'user',
           email: 'user1@wtm.com',
-          phone: '+966500000003',
+          phone: '+92300000003',
           first_name: 'Mohammed',
           last_name: 'Customer',
           password_hash: userPassword,

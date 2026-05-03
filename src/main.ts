@@ -23,7 +23,18 @@ async function bootstrap() {
     .setTitle('WTM System API')
     .setDescription('WTM System API - Database Operations')
     .setVersion('1.0')
+    .addBearerAuth()
     .addTag('users')
+    .addTag('auth')
+    .addTag('services')
+    .addTag('bookings')
+    .addTag('drivers')
+    .addTag('payments')
+    .addTag('notifications')
+    .addTag('history')
+    .addTag('driver-tasks')
+    .addTag('ratings')
+    .addTag('invoices')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
