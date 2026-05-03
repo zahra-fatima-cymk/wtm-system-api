@@ -10,3 +10,26 @@ export const ROLES = {
   DRIVER: 'driver',
   USER: 'user',
 };
+
+export const ROLE_PERMISSIONS = {
+  [ROLES.ADMIN]: [
+    'users.manage',
+    'drivers.manage',
+    'services.manage',
+    'bookings.manage',
+    'payments.manage',
+    'reports.view',
+  ],
+  [ROLES.DRIVER]: [
+    'tasks.view',
+    'tasks.update',
+    'payments.cod.process',
+    'profile.view',
+  ],
+  [ROLES.USER]: [
+    'bookings.create',
+    'bookings.view',
+    'payments.create',
+    'profile.view',
+  ],
+};

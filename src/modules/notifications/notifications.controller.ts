@@ -13,7 +13,7 @@ export class NotificationsController {
   @Get()
   @ApiOperation({ summary: 'Get user notifications' })
   findAll(@Request() req) {
-    return this.notificationsService.findByUser(req.user.userId);
+    return this.notificationsService.findByUser(req.user?.id ?? req.user?.sub);
   }
 
   @Put(':id/read')

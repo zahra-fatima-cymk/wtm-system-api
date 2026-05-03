@@ -16,7 +16,7 @@ export class HistoryController {
   @Get('user')
   @ApiOperation({ summary: 'Get current user history' })
   findMyHistory(@Request() req) {
-    return this.historyService.findByUser(req.user.userId);
+    return this.historyService.findByUser(req.user?.id ?? req.user?.sub);
   }
 
   @Get()
