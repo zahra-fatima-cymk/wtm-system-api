@@ -7,6 +7,7 @@ import {
   Param,
   UseGuards,
   Request,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -53,8 +54,12 @@ export class DriversController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current driver profile' })
   @ApiResponse({ status: 200, type: Driver })
-  findMyProfile(@Request() req) {
-    return this.driversService.findByUserId(req.user.id);
+  async findMyProfile(@Request() req) {
+    const driver = await this.driversService.findByUserId(req.user.id);
+    if (!driver) {
+      throw new NotFoundException('Driver profile not found for current user');
+    }
+    return driver;
   }
 
   @Get(':id')
