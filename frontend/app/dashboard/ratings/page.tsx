@@ -1,213 +1,208 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Star } from 'lucide-react';
-import { getUserRatings, getDriverRatings, getAllRatings, submitRating } from '@/lib/api';
+import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import { getAllRatings, getBookings, getDriverRatings, getUserRatings, submitRating } from '@/lib/api';
+import { getApiErrorMessage } from '@/lib/api-errors';
 import { useAuth } from '@/components/providers';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
+import { useApiQuery } from '@/hooks/use-api-query';
+import type { Booking, RatingReview } from '@/lib/types';
+import { StarIcon } from 'lucide-react';
 
-const RatingStars = ({ rating }: { rating: number }) => {
+function Stars({ value }: { value: number }) {
   return (
-    <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <Star
-          key={star}
-          className={`h-4 w-4 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-        />
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((s) => (
+        <StarIcon key={s} className={`size-4 ${s <= value ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/40'}`} />
       ))}
     </div>
   );
-};
+}
 
-const RatingsPage = () => {
+export default function RatingsPage() {
   const { user, ready } = useAuth();
-  const [ratings, setRatings] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [showSubmitDialog, setShowSubmitDialog] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState<any>(null);
-  const [ratingForm, setRatingForm] = useState({
-    rating_score: 5,
-    review_text: '',
+  const [open, setOpen] = useState(false);
+  const [bookingId, setBookingId] = useState('');
+  const [score, setScore] = useState(5);
+  const [review, setReview] = useState('');
+
+  const ratingsQ = useApiQuery(
+    ready && user ? `ratings-${user.type}-${user.id}` : null,
+    async () => {
+      if (user?.type === 'admin') return getAllRatings();
+      if (user?.type === 'driver') return getDriverRatings();
+      return getUserRatings();
+    },
+    { enabled: Boolean(ready && user) },
+  );
+
+  const bookingsQ = useApiQuery(ready && user?.type === 'user' ? 'ratings-bookings' : null, () => getBookings(), {
+    enabled: Boolean(ready && user?.type === 'user'),
   });
 
-  useEffect(() => {
-    if (!ready || !user) return;
-    const fetchRatings = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        let data: any[] = [];
-        if (user.type === 'admin') {
-          data = await getAllRatings();
-        } else if (user.type === 'driver') {
-          data = await getDriverRatings();
-        } else {
-          data = await getUserRatings();
-        }
-        setRatings(data);
-      } catch (err) {
-        setError('Unable to load ratings.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchRatings();
-  }, [ready, user]);
+  const ratedBookingIds = useMemo(() => new Set((ratingsQ.data ?? []).map((r: RatingReview) => r.booking_id)), [ratingsQ.data]);
 
-  const handleSubmitRating = async () => {
-    if (!selectedBooking) return;
+  const rateable = useMemo(() => {
+    return (bookingsQ.data ?? []).filter(
+      (b: Booking) =>
+        b.status === 'completed' &&
+        b.driver_id &&
+        !ratedBookingIds.has(b.id),
+    );
+  }, [bookingsQ.data, ratedBookingIds]);
 
+  const handleSubmit = async () => {
+    const booking = (bookingsQ.data ?? []).find((b: Booking) => String(b.id) === bookingId);
+    if (!booking?.driver_id) {
+      toast.error('Select a completed booking with a driver');
+      return;
+    }
     try {
       await submitRating({
-        booking_id: selectedBooking.id,
-        driver_id: selectedBooking.driver_id,
-        rating_score: ratingForm.rating_score,
-        review_text: ratingForm.review_text,
+        booking_id: booking.id,
+        driver_id: booking.driver_id,
+        rating_score: score,
+        review_text: review || undefined,
       });
-
-      // Refresh ratings
-      const updatedRatings = await getUserRatings();
-      setRatings(updatedRatings);
-
-      setShowSubmitDialog(false);
-      setSelectedBooking(null);
-      setRatingForm({ rating_score: 5, review_text: '' });
-    } catch {
-      setError('Unable to submit rating.');
+      toast.success('Thanks for your feedback');
+      setOpen(false);
+      setBookingId('');
+      setReview('');
+      await ratingsQ.refetch();
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, 'Could not submit rating'));
     }
   };
 
-  const openRatingDialog = (booking: any) => {
-    setSelectedBooking(booking);
-    setShowSubmitDialog(true);
-  };
+  if (!user) return null;
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <p className="text-sm uppercase tracking-[0.4em] text-slate-500">Ratings & Reviews</p>
-        <h1 className="text-3xl font-semibold text-slate-950">
-          {user?.type === 'driver' ? 'Your Performance Ratings' : 'Service Ratings'}
-        </h1>
-        <p className="max-w-2xl text-sm text-slate-600">
-          {user?.type === 'driver'
-            ? 'View ratings and feedback from customers about your service performance.'
-            : 'Rate your service experience and view your submitted ratings.'
-          }
-        </p>
-      </div>
-
-      {error ? <div className="rounded-3xl border border-red-200 bg-red-50 p-4 text-red-700">{error}</div> : null}
-
-      {/* Submit Rating Dialog for Users */}
-      {user?.type === 'user' && (
-        <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Rate Your Service</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label>Rating</Label>
-                <div className="flex gap-2 mt-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      onClick={() => setRatingForm(prev => ({ ...prev, rating_score: star }))}
-                      className="focus:outline-none"
-                    >
-                      <Star
-                        className={`h-6 w-6 ${star <= ratingForm.rating_score ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                      />
-                    </button>
-                  ))}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">Ratings</p>
+          <h2 className="mt-1 text-2xl font-semibold tracking-tight">
+            {user.type === 'driver' ? 'Your customer feedback' : user.type === 'admin' ? 'Quality oversight' : 'Your reviews'}
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Drivers see incoming scores, customers submit after delivery, admins audit the entire feed.
+          </p>
+        </div>
+        {user.type === 'user' ? (
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button className="shadow-md" disabled={rateable.length === 0}>
+                Rate a delivery
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Submit a rating</DialogTitle>
+                <DialogDescription>Only completed bookings with an assigned driver are listed.</DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-2">
+                <div className="grid gap-2">
+                  <Label>Booking</Label>
+                  <Select value={bookingId} onValueChange={setBookingId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose booking" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {rateable.map((b: Booking) => (
+                        <SelectItem key={b.id} value={String(b.id)}>
+                          #{b.id} · {b.service?.name ?? 'Service'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Score</Label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        className="rounded-md border border-border p-2 transition hover:bg-muted"
+                        onClick={() => setScore(s)}
+                      >
+                        <StarIcon className={`size-6 ${s <= score ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30'}`} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Comments</Label>
+                  <Textarea value={review} onChange={(e) => setReview(e.target.value)} placeholder="Optional feedback" rows={3} />
                 </div>
               </div>
-              <div>
-                <Label htmlFor="review">Review (Optional)</Label>
-                <Textarea
-                  id="review"
-                  placeholder="Share your experience..."
-                  value={ratingForm.review_text}
-                  onChange={(e) => setRatingForm(prev => ({ ...prev, review_text: e.target.value }))}
-                  className="mt-2"
-                />
-              </div>
-              <div className="flex gap-2 justify-end">
-                <Button variant="outline" onClick={() => setShowSubmitDialog(false)}>
-                  Cancel
+              <DialogFooter>
+                <Button onClick={handleSubmit} disabled={!bookingId}>
+                  Submit
                 </Button>
-                <Button onClick={handleSubmitRating}>
-                  Submit Rating
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        ) : null}
+      </div>
 
-      <Card>
+      <Card className="border-border/80 shadow-md">
         <CardHeader>
-          <CardTitle>
-            {user?.type === 'driver' ? 'Customer Reviews' : user?.type === 'admin' ? 'All Ratings' : 'Your Ratings'}
-          </CardTitle>
+          <CardTitle>Reviews</CardTitle>
+          <CardDescription>Live dataset from /ratings scoped to your permissions.</CardDescription>
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <p>Loading ratings…</p>
-          ) : ratings.length === 0 ? (
-            <p className="text-sm text-slate-600">
-              {user?.type === 'driver' ? 'No ratings received yet.' : 'No ratings submitted yet.'}
-            </p>
+          {ratingsQ.loading ? (
+            <Skeleton className="h-48 rounded-xl" />
+          ) : (ratingsQ.data ?? []).length === 0 ? (
+            <p className="text-sm text-muted-foreground">No ratings to show yet.</p>
           ) : (
             <div className="space-y-4">
-              {ratings.map((rating) => (
-                <div key={rating.id} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <RatingStars rating={rating.rating_score} />
-                        <Badge variant="outline">{rating.rating_score}/5</Badge>
-                      </div>
-
-                      {rating.review_text && (
-                        <p className="text-sm text-slate-600 mb-3">"{rating.review_text}"</p>
-                      )}
-
-                      <div className="text-xs text-slate-500 space-y-1">
-                        {user?.type === 'admin' && (
-                          <>
-                            <p><strong>Customer:</strong> {rating.user?.first_name} {rating.user?.last_name}</p>
-                            <p><strong>Driver:</strong> {rating.driver?.first_name} {rating.driver?.last_name}</p>
-                          </>
-                        )}
-                        {user?.type === 'driver' && (
-                          <p><strong>Customer:</strong> {rating.user?.first_name} {rating.user?.last_name}</p>
-                        )}
-                        {user?.type === 'user' && (
-                          <p><strong>Driver:</strong> {rating.driver?.first_name} {rating.driver?.last_name}</p>
-                        )}
-                        <p><strong>Booking:</strong> #{rating.booking_id}</p>
-                        <p><strong>Date:</strong> {new Date(rating.created_at).toLocaleDateString()}</p>
-                      </div>
-                    </div>
-
-                    {/* Rate Service Button for Users */}
-                    {user?.type === 'user' && rating.booking && !rating.review_text && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => openRatingDialog(rating.booking)}
-                      >
-                        Rate Service
-                      </Button>
-                    )}
+              {(ratingsQ.data ?? []).map((rating: RatingReview) => (
+                <div key={rating.id} className="rounded-2xl border border-border/70 bg-card/80 p-5 shadow-sm">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <Stars value={rating.rating_score} />
+                    <Badge variant="outline">{rating.rating_score}/5</Badge>
+                  </div>
+                  {rating.review_text ? <p className="mt-3 text-sm text-muted-foreground">&ldquo;{rating.review_text}&rdquo;</p> : null}
+                  <div className="mt-4 grid gap-1 text-xs text-muted-foreground">
+                    {user.type === 'admin' ? (
+                      <>
+                        <p>
+                          Customer: {rating.user ? `${rating.user.first_name} ${rating.user.last_name}` : `#${rating.user_id}`}
+                        </p>
+                        <p>
+                          Driver:{' '}
+                          {rating.driver
+                            ? `${(rating.driver as { first_name?: string }).first_name ?? ''} ${(rating.driver as { last_name?: string }).last_name ?? ''}`.trim() ||
+                              `#${rating.driver_id}`
+                            : `#${rating.driver_id}`}
+                        </p>
+                      </>
+                    ) : null}
+                    {user.type === 'driver' ? (
+                      <p>
+                        Customer: {rating.user ? `${rating.user.first_name} ${rating.user.last_name}` : 'Customer'}
+                      </p>
+                    ) : null}
+                    <p>Booking #{rating.booking_id}</p>
+                    <p>{rating.created_at ? new Date(rating.created_at).toLocaleDateString() : ''}</p>
                   </div>
                 </div>
               ))}
@@ -217,6 +212,4 @@ const RatingsPage = () => {
       </Card>
     </div>
   );
-};
-
-export default RatingsPage;
+}

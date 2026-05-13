@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Booking } from '../../models/booking.model';
 import { Service } from '../../models/service.model';
 import { Driver } from '../../models/driver.model';
+import { User } from '../../models/user.model';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { AssignDriverDto } from './dto/assign-driver.dto';
@@ -36,21 +37,25 @@ export class BookingsService {
     } as any);
   }
 
+  private bookingIncludes() {
+    return [Service, { model: Driver, include: [User] }];
+  }
+
   findAll() {
-    return this.bookingModel.findAll({ include: [Service, Driver] });
+    return this.bookingModel.findAll({ include: this.bookingIncludes() });
   }
 
   findByUser(userId: number) {
     return this.bookingModel.findAll({
       where: { user_id: userId },
-      include: [Service, Driver],
+      include: this.bookingIncludes(),
       order: [['created_at', 'DESC']],
     });
   }
 
   async findOne(id: number) {
     const booking = await this.bookingModel.findByPk(id, {
-      include: [Service, Driver],
+      include: this.bookingIncludes(),
     });
     if (!booking) {
       throw new NotFoundException('Booking not found');
@@ -61,7 +66,7 @@ export class BookingsService {
   findByDriver(driverId: number) {
     return this.bookingModel.findAll({
       where: { driver_id: driverId },
-      include: [Service, Driver],
+      include: this.bookingIncludes(),
       order: [['created_at', 'DESC']],
     });
   }

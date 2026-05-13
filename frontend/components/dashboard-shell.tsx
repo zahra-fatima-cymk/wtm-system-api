@@ -1,96 +1,73 @@
-"use client";
+'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { AuthGuard } from '@/components/auth-guard';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { WtmSidebar } from '@/components/wtm-sidebar';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { useAuth } from '@/components/providers';
-import { Moon, Sun } from 'lucide-react';
-import { useTheme } from 'next-themes';
+import { cn } from '@/lib/utils';
 
-const navItems = [
-  { label: 'Overview', href: '/dashboard', roles: ['user', 'driver', 'admin'] },
-  { label: 'Bookings', href: '/dashboard/bookings', roles: ['user', 'driver', 'admin'] },
-  { label: 'Payments', href: '/dashboard/payments', roles: ['user', 'admin'] },
-  { label: 'Invoices', href: '/dashboard/history', roles: ['user', 'admin'] },
-  { label: 'Notifications', href: '/dashboard/notifications', roles: ['user', 'driver', 'admin'] },
-  { label: 'Driver Tasks', href: '/dashboard/driver-tasks', roles: ['driver', 'admin'] },
-  { label: 'Ratings', href: '/dashboard/ratings', roles: ['user', 'driver', 'admin'] },
-];
+const routeTitles: Record<string, string> = {
+  '/dashboard': 'Overview',
+  '/dashboard/bookings': 'Bookings',
+  '/dashboard/tracking': 'Live tracking',
+  '/dashboard/payments': 'Payments',
+  '/dashboard/invoices': 'Invoices',
+  '/dashboard/history': 'History',
+  '/dashboard/notifications': 'Notifications',
+  '/dashboard/driver-tasks': 'Driver tasks',
+  '/dashboard/ratings': 'Ratings',
+  '/dashboard/users': 'Users',
+  '/dashboard/drivers': 'Drivers',
+  '/dashboard/services': 'Services',
+};
+
+function resolveTitle(pathname: string) {
+  if (routeTitles[pathname]) return routeTitles[pathname];
+  const match = Object.keys(routeTitles)
+    .filter((k) => k !== '/dashboard')
+    .find((k) => pathname.startsWith(k));
+  return match ? routeTitles[match] : 'Dashboard';
+}
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
-  const { user, logout, ready } = useAuth();
-  const { theme, setTheme } = useTheme();
+  const { user } = useAuth();
   const pathname = usePathname();
-
-  if (!ready) {
-    return <div className="min-h-screen flex items-center justify-center">Loading dashboard…</div>;
-  }
+  const title = resolveTitle(pathname);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="mx-auto flex min-h-screen max-w-[1600px] gap-6 px-4 py-6 sm:px-6 lg:px-8">
-        <aside className="hidden w-80 shrink-0 flex-col gap-6 rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-sm shadow-slate-950/5 lg:flex">
-          <div>
-            <div className="mb-4 rounded-3xl bg-slate-950/5 px-4 py-4 text-slate-950">
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-500">WTM dashboard</p>
-              <h2 className="mt-2 text-xl font-semibold">Control center</h2>
-            </div>
-            <div className="space-y-1">
-              {user ? (
-                <div className="rounded-3xl bg-slate-50 p-4">
-                  <p className="text-sm text-slate-500">Welcome back</p>
-                  <p className="mt-1 font-semibold text-slate-900">{user.first_name} {user.last_name}</p>
-                  <p className="text-xs uppercase tracking-[0.3em] text-slate-500">{user.type}</p>
-                </div>
-              ) : (
-                <div className="rounded-3xl bg-slate-50 p-4 text-sm text-slate-500">Not signed in</div>
-              )}
-            </div>
-          </div>
-
-          <nav className="flex-1 space-y-1">
-            {navItems
-              .filter((item) => user && item.roles.includes(user.type))
-              .map((item) => {
-                const active = pathname === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`block rounded-3xl px-4 py-3 text-sm font-medium transition ${
-                      active ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10' : 'text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-          </nav>
-
-          <div className="mt-auto space-y-3">
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-              Use your role to control the sections and work with all tasks safely.
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="flex-1"
-              >
-                {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+    <AuthGuard>
+      {user ? (
+        <SidebarProvider>
+          <WtmSidebar user={user} />
+          <SidebarInset
+            className={cn(
+              'min-h-screen bg-gradient-to-b from-muted/40 via-background to-background',
+              'md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2',
+            )}
+          >
+            <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b border-border/60 bg-background/80 px-4 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
+              <SidebarTrigger className="-ml-1" />
+              <Separator orientation="vertical" className="mr-2 h-6" />
+              <div className="flex flex-1 flex-col gap-0.5">
+                <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">WTM</p>
+                <h1 className="text-base font-semibold leading-none tracking-tight md:text-lg">{title}</h1>
+              </div>
+              <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
+                <Link href="/">View site</Link>
               </Button>
-              <Button variant="outline" className="flex-1" onClick={logout}>
-                Sign out
-              </Button>
+              <ThemeToggle />
+            </header>
+            <div className="flex flex-1 flex-col gap-6 p-4 md:p-8">
+              <div className="mx-auto w-full max-w-6xl flex-1">{children}</div>
             </div>
-          </div>
-        </aside>
-
-        <main className="flex-1 rounded-[2rem] border border-slate-200 bg-white/95 p-6 shadow-sm shadow-slate-950/5">
-          {children}
-        </main>
-      </div>
-    </div>
+          </SidebarInset>
+        </SidebarProvider>
+      ) : null}
+    </AuthGuard>
   );
 }

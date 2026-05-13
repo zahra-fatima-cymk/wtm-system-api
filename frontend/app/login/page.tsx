@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/components/providers';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { getApiErrorMessage } from '@/lib/api-errors';
 
 const LoginPage = () => {
   const { login } = useAuth();
@@ -20,7 +22,7 @@ const LoginPage = () => {
     try {
       await login(email, password);
     } catch (err) {
-      setError('Unable to sign in. Please check your credentials.');
+      setError(getApiErrorMessage(err, 'Unable to sign in. Please check your credentials.'));
     } finally {
       setLoading(false);
     }
@@ -28,7 +30,13 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 py-16 sm:px-10">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 sm:px-10">
+        <Link href="/" className="text-sm font-medium text-sky-300 hover:text-sky-200">
+          ← Back to site
+        </Link>
+        <ThemeToggle className="border-white/20 bg-white/5 text-white" />
+      </div>
+      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl flex-col justify-center px-6 pb-16 sm:px-10">
         <div className="mx-auto w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-900/95 p-8 shadow-2xl shadow-slate-950/40">
           <div className="mb-8 space-y-3 text-center">
             <p className="text-sm uppercase tracking-[0.4em] text-sky-400/75">Water Tank Management</p>

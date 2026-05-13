@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 import { useRouter } from 'next/navigation';
 import { getProfile, login as loginRequest } from '@/lib/api';
 import { clearAuthSession, getAuthToken, loadAuthSession, saveAuthToken, saveAuthSession, type AuthSession, type AuthUser } from '@/lib/auth';
+import { Toaster } from '@/components/ui/sonner';
 
 type AuthContextValue = {
   user: AuthUser | null;
@@ -93,7 +94,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [user, token, ready],
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+      <Toaster richColors position="top-center" closeButton />
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

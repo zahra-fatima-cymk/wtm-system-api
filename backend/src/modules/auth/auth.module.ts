@@ -15,7 +15,7 @@ import { JwtStrategy } from './jwt.strategy';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
-        const expiresIn = configService.get('JWT_EXPIRES_IN', '3600s');
+        const expiresIn = configService.get('JWT_EXPIRES_IN', '9h');
         return {
           secret: configService.get<string>('JWT_SECRET', 'supersecret'),
           signOptions: {

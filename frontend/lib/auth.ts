@@ -1,16 +1,6 @@
-export type AuthUser = {
-  id: number;
-  email: string;
-  first_name: string;
-  last_name: string;
-  type: 'user' | 'driver' | 'admin';
-  status?: string;
-  phone?: string;
-  address?: string;
-  city?: string;
-  postal_code?: string;
-  profile_image?: string;
-};
+import type { AuthUserProfile } from '@/lib/types';
+
+export type AuthUser = AuthUserProfile;
 
 export type AuthSession = {
   token: string;

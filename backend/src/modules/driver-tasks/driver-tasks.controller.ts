@@ -50,8 +50,12 @@ export class DriverTasksController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get tasks for the authenticated driver' })
   @ApiResponse({ status: 200, type: [DriverTask] })
-  findMine(@Request() req: any) {
-    return this.driverTasksService.findByDriver(req.user.id);
+  async findMine(@Request() req: any) {
+    const driver = await this.driversService.findByUserId(req.user.id);
+    if (!driver) {
+      return [];
+    }
+    return this.driverTasksService.findByDriver(driver.id);
   }
 
   @Get(':id')

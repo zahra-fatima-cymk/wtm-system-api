@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { register as registerRequest } from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { getApiErrorMessage } from '@/lib/api-errors';
 
 const RegisterPage = () => {
   const router = useRouter();
@@ -27,13 +29,10 @@ const RegisterPage = () => {
     setError('');
     setLoading(true);
     try {
-      await registerRequest({
-        ...form,
-        type: 'user',
-      });
+      await registerRequest({ ...form });
       router.push('/login');
     } catch (err) {
-      setError('Registration failed. Please verify your values and try again.');
+      setError(getApiErrorMessage(err, 'Registration failed. Please verify your values and try again.'));
     } finally {
       setLoading(false);
     }
@@ -41,7 +40,13 @@ const RegisterPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 py-16 sm:px-10">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 sm:px-10">
+        <Link href="/" className="text-sm font-medium text-sky-300 hover:text-sky-200">
+          ← Back to site
+        </Link>
+        <ThemeToggle className="border-white/20 bg-white/5 text-white" />
+      </div>
+      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl flex-col justify-center px-6 pb-16 sm:px-10">
         <div className="mx-auto w-full max-w-2xl rounded-[2rem] border border-white/10 bg-slate-900/95 p-8 shadow-2xl shadow-slate-950/40">
           <div className="mb-8 space-y-3 text-center">
             <p className="text-sm uppercase tracking-[0.4em] text-sky-400/75">Create a WTM profile</p>

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { InjectModel } from '@nestjs/sequelize';
 import { Driver } from '../../models/driver.model';
 import { Booking } from '../../models/booking.model';
+import { User } from '../../models/user.model';
 import { CreateDriverDto } from './dto/create-driver.dto';
 import { UpdateDriverDto } from './dto/update-driver.dto';
 
@@ -19,17 +20,17 @@ export class DriversService {
   }
 
   findAll() {
-    return this.driverModel.findAll({ include: [Booking] });
+    return this.driverModel.findAll({ include: [User, Booking] });
   }
 
   findOne(id: number) {
-    return this.driverModel.findByPk(id, { include: [Booking] });
+    return this.driverModel.findByPk(id, { include: [User, Booking] });
   }
 
   findByUserId(userId: number) {
     return this.driverModel.findOne({
       where: { user_id: userId },
-      include: [Booking],
+      include: [User, Booking],
     });
   }
 

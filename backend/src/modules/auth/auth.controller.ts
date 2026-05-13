@@ -13,11 +13,15 @@ import { RegisterUserDto } from './dto/register-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { User } from '../../models/user.model';
+import { UsersService } from '../../users/users.service';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user account' })
@@ -47,7 +51,11 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current authenticated user profile' })
   @ApiResponse({ status: 200, description: 'Current user profile returned', type: User })
-  profile(@CurrentUser() user: User) {
-    return user;
+  async profile(@CurrentUser() user: { id: number }) {
+    const profile = await this.usersService.findOne(user.id);
+    if (!profile) {
+      throw new UnauthorizedException('User not found');
+    }
+    return profile;
   }
 }

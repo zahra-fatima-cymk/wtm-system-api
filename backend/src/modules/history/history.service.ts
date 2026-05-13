@@ -31,4 +31,11 @@ export class HistoryService {
   async findAll(): Promise<UserHistory[]> {
       return await this.historyModel.findAll({ order: [['created_at', 'DESC']] });
   }
+
+  async findByDriverId(driverId: number): Promise<UserHistory[]> {
+    return await this.historyModel.findAll({
+      where: { driver_id: driverId },
+      order: [['created_at', 'DESC']],
+    });
+  }
 }
