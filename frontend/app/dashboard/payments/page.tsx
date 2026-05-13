@@ -120,7 +120,7 @@ export default function PaymentsPage() {
                       <SelectContent>
                         {eligibleBookings.map((b: Booking) => (
                           <SelectItem key={b.id} value={String(b.id)}>
-                            #{b.id} · SAR {b.total_amount}
+                            #{b.id} · PKR {b.total_amount}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -196,7 +196,7 @@ export default function PaymentsPage() {
                     <tr key={p.id}>
                       <td className="px-4 py-3 font-medium">#{p.id}</td>
                       <td className="px-4 py-3 text-muted-foreground">#{p.booking_id}</td>
-                      <td className="px-4 py-3">SAR {p.amount}</td>
+                      <td className="px-4 py-3">PKR {p.amount}</td>
                       <td className="px-4 py-3 capitalize">{p.payment_method?.replace('_', ' ')}</td>
                       <td className="px-4 py-3">
                         <Badge variant="outline" className="capitalize">

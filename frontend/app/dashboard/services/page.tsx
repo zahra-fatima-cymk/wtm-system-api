@@ -157,7 +157,7 @@ export default function ServicesAdminPage() {
                     </Select>
                   </div>
                   <div className="grid gap-2">
-                    <Label>Price (SAR)</Label>
+                    <Label>Price (PKR)</Label>
                     <Input
                       type="number"
                       min={0}
@@ -221,7 +221,7 @@ export default function ServicesAdminPage() {
                     </div>
                     <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">{s.description}</p>
                     <p className="mt-3 text-sm font-medium">
-                      SAR {s.price} · {s.estimated_duration ?? '—'} min
+                      PKR {s.price} · {s.estimated_duration ?? '—'} min
                     </p>
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">

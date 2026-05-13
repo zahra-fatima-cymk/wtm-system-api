@@ -83,7 +83,7 @@ export default function InvoicesPage() {
                       <td className="px-4 py-3 font-medium">{inv.invoice_number ?? `#${inv.id}`}</td>
                       <td className="px-4 py-3 text-muted-foreground">#{inv.user_id}</td>
                       <td className="px-4 py-3 capitalize">{inv.status}</td>
-                      <td className="px-4 py-3 text-right">SAR {inv.total_amount}</td>
+                      <td className="px-4 py-3 text-right">PKR {inv.total_amount}</td>
                     </tr>
                   ))}
                 </tbody>

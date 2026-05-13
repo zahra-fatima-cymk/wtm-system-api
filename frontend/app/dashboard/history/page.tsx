@@ -135,7 +135,7 @@ export default function HistoryPage() {
                           <p className="font-medium">{inv.invoice_number ?? `Invoice #${inv.id}`}</p>
                           <p className="text-xs text-muted-foreground capitalize">Status: {inv.status}</p>
                         </div>
-                        <p className="text-lg font-semibold">SAR {inv.total_amount}</p>
+                        <p className="text-lg font-semibold">PKR {inv.total_amount}</p>
                       </div>
                     ))}
                   </div>

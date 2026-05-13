@@ -148,7 +148,7 @@ export default function BookingsPage() {
                       <SelectContent>
                         {services.map((s: Service) => (
                           <SelectItem key={s.id} value={String(s.id)}>
-                            {s.name} — SAR {s.price}
+                            {s.name} — PKR {s.price}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -270,7 +270,7 @@ export default function BookingsPage() {
                           {statusLabels[booking.status] ?? booking.status}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3">SAR {booking.total_amount}</td>
+                      <td className="px-4 py-3">PKR {booking.total_amount}</td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {booking.driver
                           ? `${booking.driver.user?.first_name ?? ''} ${booking.driver.user?.last_name ?? ''}`.trim() ||

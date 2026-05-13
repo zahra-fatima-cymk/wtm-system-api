@@ -120,7 +120,7 @@ export default function DriverTasksPage() {
                               : '—'}
                           </p>
                           <p>Address: {task.booking.delivery_address}</p>
-                          <p>Amount: SAR {task.booking.total_amount}</p>
+                          <p>Amount: PKR {task.booking.total_amount}</p>
                           <p className="capitalize">
                             Payment: {task.booking.payment_method?.replace('_', ' ') ?? '—'}
                           </p>
@@ -140,7 +140,7 @@ export default function DriverTasksPage() {
                       ) : null}
                       {task.booking?.payment_method === 'cash_on_delivery' && task.status === 'completed' ? (
                         <Badge variant="destructive" className="w-fit">
-                          Collect COD: SAR {task.booking.total_amount}
+                          Collect COD: PKR {task.booking.total_amount}
                         </Badge>
                       ) : null}
                     </div>

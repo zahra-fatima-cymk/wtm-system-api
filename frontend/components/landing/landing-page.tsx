@@ -155,7 +155,7 @@ export function LandingPage() {
                       <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
                         {service.service_type?.replace('_', ' ') ?? 'Service'}
                       </span>
-                      <span className="text-lg font-semibold">SAR {service.price}</span>
+                      <span className="text-lg font-semibold">PKR {service.price}</span>
                     </CardContent>
                   </Card>
                 ))}
