@@ -1,98 +1,240 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# WTM - Water Tank Management System
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A comprehensive water tank management system built with NestJS (backend) and Next.js (frontend) for managing water delivery services, bookings, payments, and driver operations.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Features
 
-## Description
+### Core Functionality
+- **Booking Management**: Create and manage water delivery bookings
+- **Driver Tasks**: Assign and track driver tasks with status updates
+- **Payment Processing**: Handle online and cash-on-delivery payments
+- **Real-time Tracking**: Monitor booking and delivery status
+- **Rating System**: Customer and driver rating/reviews
+- **Notification System**: Automated notifications for all stakeholders
+- **User History**: Complete audit trail of all user activities
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### Role-Based Access Control
+- **Admin**: Full system control and management
+- **Driver**: Task management, status updates, cash collection
+- **User**: Booking management, payment tracking, service ratings
 
-## Project setup
+## 🏗️ Architecture
 
-```bash
-$ yarn install
-```
+### Backend (NestJS)
+- **Port**: 3333
+- **Framework**: NestJS with TypeScript
+- **Database**: PostgreSQL/MySQL with Sequelize ORM
+- **Authentication**: JWT (9-hour expiry)
+- **API Documentation**: Swagger/OpenAPI
 
-## Compile and run the project
+### Frontend (Next.js)
+- **Port**: 4444
+- **Framework**: Next.js 16 with TypeScript
+- **UI Library**: shadcn/ui with Tailwind CSS
+- **State Management**: React Context + Custom Hooks
+- **Theme Support**: Light/Dark mode toggle
 
-```bash
-# development
-$ yarn run start
+## 📊 Database Schema
 
-# watch mode
-$ yarn run start:dev
+### Core Tables
+- **users**: User accounts with role-based access (admin/driver/user)
+- **drivers**: Driver profiles with vehicle and rating information
+- **services**: Available services (delivery, cleaning, maintenance, etc.)
+- **bookings**: Service booking records
+- **driver_tasks**: Task assignments for drivers
+- **payments**: Payment records (online/cash-on-delivery)
+- **ratings_reviews**: Customer feedback and ratings
+- **notifications**: System and user notifications
+- **user_history**: Complete audit trail
+- **invoices**: Billing and invoicing system
 
-# production mode
-$ yarn run start:prod
-```
+All tables include audit fields (`created_by`, `updated_by`, `created_at`, `updated_at`).
 
-## Run tests
+## 🛠️ Setup Instructions
 
-```bash
-# unit tests
-$ yarn run test
+### Prerequisites
+- Node.js 18+
+- PostgreSQL or MySQL database
+- npm or yarn
 
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 1. Clone and Install Dependencies
 
 ```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
+# Install backend dependencies
+cd backend
+npm install
+
+# Install frontend dependencies
+cd ../frontend
+npm install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 2. Database Setup
 
-## Resources
+```bash
+# Navigate to backend directory
+cd backend
 
-Check out a few resources that may come in handy when working with NestJS:
+# Create database and update .env file
+cp .env.example .env
+# Edit .env with your database credentials
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# Run migrations
+npm run db:migrate
 
-## Support
+# Seed initial data
+npm run db:seed
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### 3. Environment Configuration
 
-## Stay in touch
+#### Backend (.env)
+```env
+PORT=3333
+DATABASE_NAME=your_database_name
+DATABASE_USER=your_database_user
+DATABASE_PASSWORD=your_database_password
+DATABASE_HOST=localhost
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRES_IN=9h
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+#### Frontend (.env.local)
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3333
+```
 
-## License
+### 4. Run the Application
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+# Terminal 1: Start Backend
+cd backend
+npm run dev
+
+# Terminal 2: Start Frontend
+cd frontend
+npm run dev
+```
+
+### 5. Access the Application
+
+- **Frontend**: http://localhost:4444
+- **Backend API**: http://localhost:3333
+- **API Documentation**: http://localhost:3333/api/docs
+
+## 👥 Default Users
+
+After seeding, you can login with these accounts:
+
+### Admin
+- **Email**: admin@wtm.com
+- **Password**: Admin@123
+
+### Driver
+- **Email**: driver1@wtm.com
+- **Password**: Driver@123
+
+### Customer
+- **Email**: user1@wtm.com
+- **Password**: User@123
+
+## 📱 User Roles & Permissions
+
+### Admin Dashboard
+- View all bookings, payments, and users
+- Assign drivers to bookings
+- Manage services and system settings
+- Access all reports and analytics
+
+### Driver Dashboard
+- View assigned tasks
+- Update task status (assigned → in_progress → completed)
+- Collect cash payments
+- View personal ratings and history
+
+### User Dashboard
+- Create new bookings
+- Track booking status
+- View payment history
+- Rate completed services
+- Access personal history
+
+## 🔧 API Endpoints
+
+### Authentication
+- `POST /auth/register` - User registration
+- `POST /auth/login` - User login
+- `GET /auth/profile` - Get user profile
+
+### Bookings
+- `GET /bookings` - List user bookings (role-based)
+- `POST /bookings` - Create booking
+- `PATCH /bookings/:id/status` - Update booking status
+- `PATCH /bookings/:id/assign-driver` - Assign driver (Admin only)
+
+### Payments
+- `GET /payments` - List payments
+- `POST /payments` - Create payment
+- `PATCH /payments/:id/verify` - Verify payment (Admin only)
+
+### Driver Tasks
+- `GET /driver-tasks/me` - Get driver's tasks
+- `PATCH /driver-tasks/:id` - Update task status
+
+### Ratings
+- `GET /ratings/user/me` - User's submitted ratings
+- `GET /ratings/driver/me` - Driver's received ratings
+- `POST /ratings` - Submit rating
+
+### Notifications
+- `GET /notifications` - Get user notifications
+- `PUT /notifications/:id/read` - Mark as read
+
+### History
+- `GET /history/user` - User activity history
+
+## 🎨 Frontend Features
+
+- **Responsive Design**: Mobile-first approach
+- **Dark/Light Theme**: System preference detection
+- **Role-based UI**: Dynamic sidebar and content based on user role
+- **Real-time Updates**: Automatic data refresh
+- **Error Handling**: Comprehensive error states and loading indicators
+- **Professional UI**: Modern design with shadcn/ui components
+
+## 🔒 Security Features
+
+- JWT authentication with 9-hour expiry
+- Role-based access control (RBAC)
+- Input validation and sanitization
+- SQL injection prevention
+- CORS configuration
+- Password hashing with bcrypt
+
+## 📈 Future Enhancements
+
+- Real-time notifications with WebSocket
+- GPS tracking integration
+- Payment gateway integration
+- Mobile app development
+- Advanced analytics dashboard
+- Multi-language support
+- Email/SMS notifications
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 👨‍💻 Developer
+
+**Zahra Fatima & Aqsa**
+- Water Tank Management System Project
+- Built with ❤️ using NestJS and Next.js
