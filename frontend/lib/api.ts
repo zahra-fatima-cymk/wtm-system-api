@@ -47,7 +47,7 @@ export const getInvoices = () =>
   axiosInstance.get<any[]>('/invoices/me').then((res) => res.data);
 
 export const getDriverTasks = () =>
-  axiosInstance.get<any[]>('/driver-tasks').then((res) => res.data);
+  axiosInstance.get<any[]>('/driver-tasks/me').then((res) => res.data);
 
 export const getUserRatings = () =>
   axiosInstance.get<any[]>('/ratings/user/me').then((res) => res.data);

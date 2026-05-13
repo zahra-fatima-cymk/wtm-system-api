@@ -18,6 +18,9 @@ async function bootstrap() {
     }),
   );
 
+  // Enable CORS
+  app.enableCors();
+
   // Swagger configuration
   const config = new DocumentBuilder()
     .setTitle('WTM System API')

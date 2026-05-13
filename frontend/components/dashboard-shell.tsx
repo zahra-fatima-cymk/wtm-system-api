@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/providers';
+import { Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 const navItems = [
   { label: 'Overview', href: '/dashboard', roles: ['user', 'driver', 'admin'] },
@@ -17,6 +19,7 @@ const navItems = [
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const { user, logout, ready } = useAuth();
+  const { theme, setTheme } = useTheme();
   const pathname = usePathname();
 
   if (!ready) {
@@ -68,9 +71,19 @@ export default function DashboardShell({ children }: { children: React.ReactNode
             <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
               Use your role to control the sections and work with all tasks safely.
             </div>
-            <Button variant="outline" className="w-full" onClick={logout}>
-              Sign out
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="flex-1"
+              >
+                {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </Button>
+              <Button variant="outline" className="flex-1" onClick={logout}>
+                Sign out
+              </Button>
+            </div>
           </div>
         </aside>
 

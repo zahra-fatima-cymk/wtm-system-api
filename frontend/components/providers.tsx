@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getProfile, login as loginRequest } from '@/lib/api';
-import { clearAuthSession, loadAuthSession, saveAuthSession, type AuthSession, type AuthUser } from '@/lib/auth';
+import { clearAuthSession, getAuthToken, loadAuthSession, saveAuthToken, saveAuthSession, type AuthSession, type AuthUser } from '@/lib/auth';
 
 type AuthContextValue = {
   user: AuthUser | null;
@@ -22,16 +22,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const session = loadAuthSession();
-    if (session) {
-      setUser(session.user);
-      setToken(session.token);
+    async function init() {
+      const session = loadAuthSession();
+      if (session) {
+        setUser(session.user);
+        setToken(session.token);
+        setReady(true);
+        return;
+      }
+
+      const token = getAuthToken();
+      if (!token) {
+        setReady(true);
+        return;
+      }
+
+      try {
+        const profile = await getProfile();
+        const newSession: AuthSession = {
+          token,
+          expiresAt: Date.now() + 9 * 3600 * 1000,
+          user: profile,
+        };
+        saveAuthSession(newSession);
+        setUser(profile);
+        setToken(token);
+      } catch {
+        clearAuthSession();
+        setUser(null);
+        setToken(null);
+      } finally {
+        setReady(true);
+      }
     }
-    setReady(true);
+
+    init();
   }, []);
 
   const login = async (email: string, password: string) => {
     const data = await loginRequest({ email, password });
+    saveAuthToken(data.access_token);
     const profile = await getProfile();
     const session: AuthSession = {
       token: data.access_token,
